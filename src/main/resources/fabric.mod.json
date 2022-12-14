@@ -3,10 +3,10 @@
   "id": "replayeditorplus",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Replay Mod +",
+  "description": "A re-implementation of the Replay Editor using JavaFX",
   "authors": [
-    "Me!"
+    "Igrium"
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
