@@ -3,6 +3,7 @@ package com.igrium.replayeditorplus;
 import com.igrium.craftfx.application.ApplicationType;
 import com.igrium.craftfx.application.CraftApplication;
 import com.igrium.replayeditorplus.ui.ReplayEditorUI;
+import com.replaymod.replay.ReplayHandler;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +14,8 @@ import net.minecraft.client.MinecraftClient;
 
 public class ReplayEditor extends CraftApplication {
 
+    private ReplayHandler replayHandler;
+    
     protected ReplayEditorUI editorUI;
 
     public ReplayEditor(ApplicationType<?> type, MinecraftClient client) {
@@ -31,6 +34,14 @@ public class ReplayEditor extends CraftApplication {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    public ReplayHandler getReplayHandler() {
+        return replayHandler;
+    }
+
+    public void setReplayHandler(ReplayHandler replayHandler) {
+        this.replayHandler = replayHandler;
     }
 
     @Override
