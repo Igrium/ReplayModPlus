@@ -1,10 +1,14 @@
 package com.igrium.replayeditorplus.ui.controls;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
@@ -88,7 +92,7 @@ public class TimelineUI extends Region {
         }
     }
 
-    private DoubleProperty startProperty = new SimpleDoubleProperty(0);
+    private final DoubleProperty startProperty = new SimpleDoubleProperty(0);
 
     public double getStart() {
         return startProperty.get();
@@ -102,7 +106,7 @@ public class TimelineUI extends Region {
         return startProperty;
     }
 
-    private DoubleProperty endProperty = new SimpleDoubleProperty(10);
+    private final DoubleProperty endProperty = new SimpleDoubleProperty(10);
 
     public double getEnd() {
         return endProperty.get();
@@ -116,7 +120,7 @@ public class TimelineUI extends Region {
         return endProperty;
     }
 
-    private DoubleProperty timeProperty = new SimpleDoubleProperty(0);
+    private final DoubleProperty timeProperty = new SimpleDoubleProperty(0);
 
     public double getTime() {
         return timeProperty.get();
@@ -130,7 +134,14 @@ public class TimelineUI extends Region {
         return timeProperty;
     }
 
+    private final DoubleProperty prefScaleProperty = new SimpleDoubleProperty(1);
+
+    public void setPrefScale(double scale) {
+        prefScaleProperty.set(scale);
+    }
+
     private ObservableList<TimelineNode<?>> nodes = FXCollections.observableArrayList();
+    private BiMap<TimelineNode<?>, Node> baseNodes = HashBiMap.create();
 
     /**
      * Get all the nodes that are a part of this timeline.
@@ -138,5 +149,26 @@ public class TimelineUI extends Region {
      */
     public ObservableList<TimelineNode<?>> getNodes() {
         return nodes;
+    }
+
+    public TimelineUI() {
+        nodes.addListener(new ListChangeListener<TimelineNode<?>>() {
+
+            public void onChanged(Change<? extends TimelineNode<?>> c) {
+                c.getAddedSubList().forEach(TimelineUI.this::onAddNode);
+                c.getRemoved().forEach(TimelineUI.this::onRemoveNode);
+            }
+            
+        });
+    }
+
+    private void onAddNode(TimelineNode<?> node) {
+        getChildren().add(node.getNode());
+        baseNodes.put(node, node.getNode());
+    }
+
+    private void onRemoveNode(TimelineNode<?> node) {
+        getChildren().remove(node.getNode());
+        baseNodes.remove(node);
     }
 }
