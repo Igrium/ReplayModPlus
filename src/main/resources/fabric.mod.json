@@ -3,7 +3,7 @@
   "id": "replayeditorplus",
   "version": "${version}",
 
-  "name": "Replay Mod +",
+  "name": "Replay Editor +",
   "description": "A re-implementation of the Replay Editor using JavaFX",
   "authors": [
     "Igrium"
