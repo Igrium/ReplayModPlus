@@ -33,6 +33,7 @@
 -->
 
 <?import com.igrium.craftfx.viewport.PrimaryViewport?>
+<?import com.igrium.replayeditorplus.ui.controls.TimelineUI?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -85,6 +86,9 @@
          <center>
             <PrimaryViewport fx:id="primaryViewport" BorderPane.alignment="CENTER" />
          </center>
+         <bottom>
+            <TimelineUI fx:id="timeline" end="20.0" style="-fx-background-color: #DDD;" time="4.0" BorderPane.alignment="CENTER" />
+         </bottom>
       </BorderPane>
   </children>
 </VBox>

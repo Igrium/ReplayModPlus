@@ -4,6 +4,7 @@ import com.igrium.craftfx.viewport.EngineViewport;
 import com.igrium.craftfx.viewport.PrimaryViewport;
 import com.igrium.craftfx.viewport.StandardInputController;
 import com.igrium.replayeditorplus.ReplayEditor;
+import com.igrium.replayeditorplus.ui.controls.TimelineUI;
 
 import javafx.fxml.FXML;
 
@@ -12,6 +13,10 @@ public class ReplayEditorUI {
 
     @FXML
     private PrimaryViewport primaryViewport;
+
+    @FXML
+    private TimelineUI timeline;
+
     private StandardInputController<?> inputController;
     protected ReplayEditor editor;
 

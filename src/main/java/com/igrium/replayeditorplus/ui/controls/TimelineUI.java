@@ -1,8 +1,13 @@
 package com.igrium.replayeditorplus.ui.controls;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -10,6 +15,10 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
@@ -134,14 +143,23 @@ public class TimelineUI extends Region {
         return timeProperty;
     }
 
-    private final DoubleProperty prefScaleProperty = new SimpleDoubleProperty(1);
+    private final DoubleProperty prefScaleProperty = new SimpleDoubleProperty(128);
 
     public void setPrefScale(double scale) {
         prefScaleProperty.set(scale);
     }
 
+    public double getPrefScale() {
+        return prefScaleProperty.get();
+    }
+
+    public DoubleProperty prefScaleProperty() {
+        return prefScaleProperty;
+    }
+
     private ObservableList<TimelineNode<?>> nodes = FXCollections.observableArrayList();
     private BiMap<TimelineNode<?>, Node> baseNodes = HashBiMap.create();
+    private Playhead playhead;
 
     /**
      * Get all the nodes that are a part of this timeline.
@@ -151,24 +169,99 @@ public class TimelineUI extends Region {
         return nodes;
     }
 
+    private InvalidationListener invalidationListener = val -> requestLayout();
+
     public TimelineUI() {
         nodes.addListener(new ListChangeListener<TimelineNode<?>>() {
 
             public void onChanged(Change<? extends TimelineNode<?>> c) {
                 c.getAddedSubList().forEach(TimelineUI.this::onAddNode);
                 c.getRemoved().forEach(TimelineUI.this::onRemoveNode);
+                playhead.toFront();
+
+                requestLayout();
             }
             
         });
+        playhead = new Playhead();
+        getChildren().add(playhead);
+
+        startProperty.addListener(invalidationListener);
+        endProperty.addListener(invalidationListener);
+        timeProperty.addListener(invalidationListener);
+        prefScaleProperty.addListener(invalidationListener);
     }
 
     private void onAddNode(TimelineNode<?> node) {
         getChildren().add(node.getNode());
         baseNodes.put(node, node.getNode());
+        node.timeProperty().addListener(invalidationListener);
     }
 
     private void onRemoveNode(TimelineNode<?> node) {
         getChildren().remove(node.getNode());
         baseNodes.remove(node);
+        node.timeProperty().removeListener(invalidationListener);
+    }
+
+    private double timeToPos(double time) {
+        double start = getStart();
+        double end = getEnd();
+        Bounds bounds = getBoundsInLocal();
+
+        return bounds.getMinX() + (time - start) * bounds.getWidth() / (end - start);
+    }
+
+    @Override
+    protected double computePrefHeight(double width) {
+        return 128;
+    }
+
+    @Override
+    protected double computePrefWidth(double height) {
+        return (getEnd() - getStart()) * getPrefScale();
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        double height = getHeight();
+
+        // Set playhead
+        double playheadWidth = playhead.prefWidth(height);
+        double playheadPos = timeToPos(getTime());
+        layoutInArea(playhead, playheadPos - playheadWidth / 2, 0, playheadWidth, height, 0, HPos.CENTER, VPos.TOP);
+        
+        List<Bounds> occupiedRanges = new ArrayList<>();
+        for (TimelineNode<?> timelineNode : nodes) {
+            Node node = timelineNode.getNode();
+            node.autosize();
+            
+            Bounds localBounds = node.getBoundsInLocal();
+            double xPos = timeToPos(timelineNode.getTime());
+            double yPos = localBounds.getMinY(); // Start below the top of the frame
+            Bounds bounds = transformBounds(localBounds, xPos, yPos);
+
+            // The complexity of this isn't great, but the data set isn't large so I don't care.
+            Bounds overlapping;
+            while ((overlapping = getIf(occupiedRanges, bounds::intersects)) != null) {
+                yPos = overlapping.getMaxY() + localBounds.getMinY();
+                bounds = transformBounds(localBounds, xPos, yPos);
+            }
+            
+            occupiedRanges.add(bounds);
+            node.relocate(xPos, yPos);
+        }
+    }
+
+    private Bounds transformBounds(Bounds bounds, double x, double y) {
+        return new BoundingBox(bounds.getMinX() + x, bounds.getMinY() + y, bounds.getWidth(), bounds.getHeight());
+    }
+    
+    private <T> T getIf(Iterable<T> collection, Predicate<T> predicate) {
+        for (T item : collection) {
+            if (predicate.test(item)) return item;
+        }
+        return null;
     }
 }
