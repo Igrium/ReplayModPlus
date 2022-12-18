@@ -41,7 +41,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.igrium.replayeditorplus.ui.ReplayEditorUI">
+<VBox prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.igrium.replayeditorplus.ui.ReplayEditorUI">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -84,10 +84,10 @@
     </MenuBar>
       <BorderPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
          <center>
-            <PrimaryViewport fx:id="primaryViewport" BorderPane.alignment="CENTER" />
+            <PrimaryViewport fx:id="primaryViewport" style="-fx-background-color: black;" BorderPane.alignment="CENTER" />
          </center>
          <bottom>
-            <TimelineUI fx:id="timeline" end="20.0" style="-fx-background-color: #DDD;" time="4.0" BorderPane.alignment="CENTER" />
+            <TimelineUI fx:id="timeline" end="20.0" style="-fx-background-color: #DDD;" time="5.0" BorderPane.alignment="CENTER" />
          </bottom>
       </BorderPane>
   </children>

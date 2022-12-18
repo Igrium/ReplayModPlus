@@ -9,18 +9,24 @@ import com.google.common.collect.HashBiMap;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
-import javafx.geometry.HPos;
-import javafx.geometry.VPos;
+import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 
 /**
  * Renders a timeline preview with a playhead
@@ -157,9 +163,24 @@ public class TimelineUI extends Region {
         return prefScaleProperty;
     }
 
+    private final ObjectProperty<Paint> playheadColor = new SimpleObjectProperty<>(Color.ORANGE);
+
+    public Paint getPlayheadColor() {
+        return playheadColor.get();
+    }
+
+    public void setPlayheadColor(Paint color) {
+        playheadColor.set(color);
+    }
+
+    public ObjectProperty<Paint> playheadColorProperty() {
+        return playheadColor;
+    }
+
     private ObservableList<TimelineNode<?>> nodes = FXCollections.observableArrayList();
     private BiMap<TimelineNode<?>, Node> baseNodes = HashBiMap.create();
-    private Playhead playhead;
+    // private Playhead playhead;
+    private Node playhead;
 
     /**
      * Get all the nodes that are a part of this timeline.
@@ -183,13 +204,37 @@ public class TimelineUI extends Region {
             }
             
         });
-        playhead = new Playhead();
+        playhead = createPlayhead();
         getChildren().add(playhead);
 
         startProperty.addListener(invalidationListener);
         endProperty.addListener(invalidationListener);
         timeProperty.addListener(invalidationListener);
         prefScaleProperty.addListener(invalidationListener);
+    }
+
+    private Node createPlayhead() {        
+        Polygon polygon = new Polygon(
+            -5, 0,
+            5, 0,
+            5, 5,
+            0, 10,
+            -5, 5
+        );
+        polygon.fillProperty().bind(playheadColorProperty());
+
+        Line line = new Line(0, 0, 0, 128);
+        line.endYProperty().bind(heightProperty());
+        line.strokeProperty().bind(playheadColorProperty());
+        Group group = new Group(polygon, line);
+        
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setOffsetX(1);
+        dropShadow.setOffsetY(1);
+        dropShadow.setRadius(1);
+        group.setEffect(dropShadow);
+        
+        return group;
     }
 
     private void onAddNode(TimelineNode<?> node) {
@@ -225,12 +270,10 @@ public class TimelineUI extends Region {
     @Override
     protected void layoutChildren() {
         super.layoutChildren();
-        double height = getHeight();
-
         // Set playhead
-        double playheadWidth = playhead.prefWidth(height);
         double playheadPos = timeToPos(getTime());
-        layoutInArea(playhead, playheadPos - playheadWidth / 2, 0, playheadWidth, height, 0, HPos.CENTER, VPos.TOP);
+        playhead.autosize();
+        playhead.relocate(playheadPos, 0);
         
         List<Bounds> occupiedRanges = new ArrayList<>();
         for (TimelineNode<?> timelineNode : nodes) {
