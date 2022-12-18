@@ -37,6 +37,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
@@ -87,7 +88,11 @@
             <PrimaryViewport fx:id="primaryViewport" style="-fx-background-color: black;" BorderPane.alignment="CENTER" />
          </center>
          <bottom>
-            <TimelineUI fx:id="timeline" end="20.0" style="-fx-background-color: #DDD;" time="5.0" BorderPane.alignment="CENTER" />
+            <ScrollPane vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+               <content>
+                  <TimelineUI fx:id="timeline" end="20.0" prefHeight="64.0" prefScale="64.0" style="-fx-background-color: #DDD;" time="5.0" />
+               </content>
+            </ScrollPane>
          </bottom>
       </BorderPane>
   </children>

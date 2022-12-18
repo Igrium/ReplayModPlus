@@ -8,10 +8,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -21,6 +23,8 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -177,10 +181,35 @@ public class TimelineUI extends Region {
         return playheadColor;
     }
 
+    private final ObjectProperty<Paint> tickColorProperty = new SimpleObjectProperty<>(Color.GRAY);
+
+    public Paint getTickColor() {
+        return tickColorProperty.get();
+    }
+
+    public void setTickColor(Paint color) {
+        tickColorProperty.set(color);
+    }
+
+    private final BooleanProperty showTicksProperty = new SimpleBooleanProperty(true);
+
+    public boolean getShowTicks() {
+        return showTicksProperty.get();
+    }
+
+    public void setShowTicks(boolean showTicks) {
+        showTicksProperty.set(showTicks);
+    }
+
+    public BooleanProperty showTicksProperty() {
+        return showTicksProperty;
+    }
+
     private ObservableList<TimelineNode<?>> nodes = FXCollections.observableArrayList();
     private BiMap<TimelineNode<?>, Node> baseNodes = HashBiMap.create();
-    // private Playhead playhead;
+
     private Node playhead;
+    private Canvas canvas;
 
     /**
      * Get all the nodes that are a part of this timeline.
@@ -204,6 +233,17 @@ public class TimelineUI extends Region {
             }
             
         });
+        canvas = new Canvas();
+        canvas.widthProperty().bind(this.widthProperty());
+        canvas.heightProperty().bind(this.heightProperty());
+        canvas.visibleProperty().bind(showTicksProperty());
+
+        canvas.widthProperty().addListener((obs, oldVal, newVal) -> redrawCanvas());
+        canvas.heightProperty().addListener((obs, oldVal, newVal) -> redrawCanvas());
+        tickColorProperty.addListener((obs, oldVal, newVal) -> redrawCanvas());
+
+        getChildren().add(canvas);
+
         playhead = createPlayhead();
         getChildren().add(playhead);
 
@@ -267,6 +307,33 @@ public class TimelineUI extends Region {
         return (getEnd() - getStart()) * getPrefScale();
     }
 
+    // private InvalidationListener updateCanvas = val -> redrawCanvas();
+
+    private void redrawCanvas() {
+        Canvas canvas = this.canvas;
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        gc.setStroke(getTickColor());
+        gc.setLineWidth(1);
+
+        final double secondWidth = timeToPos(1);
+        final double endTime = getEnd();
+        final double maxHeight = 64;
+        double lineStart = canvas.getHeight();
+
+        int level = 1;
+        double subdivision = 1;
+        while (secondWidth / (subdivision = Math.pow(2, level - 1)) >= 8) {
+            double lineEnd = lineStart - maxHeight / level;
+            for (int i = 0; i < endTime * subdivision; i++) {
+                double lineX = i * secondWidth / subdivision;
+                gc.strokeLine(lineX, lineStart, lineX, lineEnd);
+            }
+            level++;
+        }
+    }
+
     @Override
     protected void layoutChildren() {
         super.layoutChildren();
@@ -274,6 +341,11 @@ public class TimelineUI extends Region {
         double playheadPos = timeToPos(getTime());
         playhead.autosize();
         playhead.relocate(playheadPos, 0);
+        playhead.toFront();
+
+        // Canvas
+        canvas.toBack();
+        canvas.relocate(0, 0);
         
         List<Bounds> occupiedRanges = new ArrayList<>();
         for (TimelineNode<?> timelineNode : nodes) {
