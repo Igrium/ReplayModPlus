@@ -21,10 +21,10 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.geometry.HPos;
+import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -209,7 +209,8 @@ public class TimelineUI extends Region {
     private BiMap<TimelineNode<?>, Node> baseNodes = HashBiMap.create();
 
     private Node playhead;
-    private Canvas canvas;
+    // private Canvas canvas;
+    private TimelineTicks timelineTicks;
 
     /**
      * Get all the nodes that are a part of this timeline.
@@ -233,16 +234,12 @@ public class TimelineUI extends Region {
             }
             
         });
-        canvas = new Canvas();
-        canvas.widthProperty().bind(this.widthProperty());
-        canvas.heightProperty().bind(this.heightProperty());
-        canvas.visibleProperty().bind(showTicksProperty());
 
-        canvas.widthProperty().addListener((obs, oldVal, newVal) -> redrawCanvas());
-        canvas.heightProperty().addListener((obs, oldVal, newVal) -> redrawCanvas());
-        tickColorProperty.addListener((obs, oldVal, newVal) -> redrawCanvas());
-
-        getChildren().add(canvas);
+        timelineTicks = new TimelineTicks();
+        timelineTicks.startProperty().bind(startProperty);
+        timelineTicks.endProperty().bind(endProperty);
+        timelineTicks.tickColorProperty().bind(tickColorProperty);
+        getChildren().add(timelineTicks);
 
         playhead = createPlayhead();
         getChildren().add(playhead);
@@ -307,33 +304,6 @@ public class TimelineUI extends Region {
         return (getEnd() - getStart()) * getPrefScale();
     }
 
-    // private InvalidationListener updateCanvas = val -> redrawCanvas();
-
-    private void redrawCanvas() {
-        Canvas canvas = this.canvas;
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        gc.setStroke(getTickColor());
-        gc.setLineWidth(1);
-
-        final double secondWidth = timeToPos(1);
-        final double endTime = getEnd();
-        final double maxHeight = 64;
-        double lineStart = canvas.getHeight();
-
-        int level = 1;
-        double subdivision = 1;
-        while (secondWidth / (subdivision = Math.pow(2, level - 1)) >= 8) {
-            double lineEnd = lineStart - maxHeight / level;
-            for (int i = 0; i < endTime * subdivision; i++) {
-                double lineX = i * secondWidth / subdivision;
-                gc.strokeLine(lineX, lineStart, lineX, lineEnd);
-            }
-            level++;
-        }
-    }
-
     @Override
     protected void layoutChildren() {
         super.layoutChildren();
@@ -344,8 +314,8 @@ public class TimelineUI extends Region {
         playhead.toFront();
 
         // Canvas
-        canvas.toBack();
-        canvas.relocate(0, 0);
+        layoutInArea(timelineTicks, 0, 0, getWidth(), getHeight(), 0, HPos.LEFT, VPos.TOP);
+        timelineTicks.toBack();
         
         List<Bounds> occupiedRanges = new ArrayList<>();
         for (TimelineNode<?> timelineNode : nodes) {
