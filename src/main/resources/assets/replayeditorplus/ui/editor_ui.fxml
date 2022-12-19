@@ -89,9 +89,9 @@
             <PrimaryViewport fx:id="primaryViewport" style="-fx-background-color: black;" BorderPane.alignment="CENTER" />
          </center>
          <bottom>
-            <ScrollPane vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+            <ScrollPane focusTraversable="false" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                <content>
-                  <TimelineUI fx:id="timeline" end="130.0" prefHeight="64.0" prefScale="64.0" style="-fx-background-color: #DDD;" time="5.0" />
+                  <TimelineUI fx:id="timeline" end="130.0" prefHeight="92.0" prefScale="64.0" style="-fx-background-color: #DDD;" time="5.0" />
                </content>
                <BorderPane.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

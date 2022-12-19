@@ -294,6 +294,19 @@ public class TimelineUI extends Region {
         return bounds.getMinX() + (time - start) * bounds.getWidth() / (end - start);
     }
 
+    /**
+     * Get the time at a particular position in the timeline.
+     * @param x The x coordinate in this node's local space.
+     * @return The equivalent time in seconds.
+     */
+    public double getTimeAt(double x) {
+        double start = getStart();
+        double end = getEnd();
+        Bounds bounds = getBoundsInLocal();
+
+        return start + (x - bounds.getMinX()) * (end - start) / bounds.getWidth();
+    }
+
     @Override
     protected double computePrefHeight(double width) {
         return 128;

@@ -1,5 +1,6 @@
 package com.igrium.replayeditorplus.ui;
 
+import com.igrium.craftfx.util.ThreadUtils;
 import com.igrium.craftfx.viewport.EngineViewport;
 import com.igrium.craftfx.viewport.PrimaryViewport;
 import com.igrium.craftfx.viewport.StandardInputController;
@@ -7,6 +8,8 @@ import com.igrium.replayeditorplus.ReplayEditor;
 import com.igrium.replayeditorplus.ui.controls.TimelineUI;
 
 import javafx.fxml.FXML;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 public class ReplayEditorUI {
     public static final String FXML = "/assets/replayeditorplus/ui/editor_ui.fxml";
@@ -45,6 +48,11 @@ public class ReplayEditorUI {
     @FXML
     protected void initialize() {
         inputController = new StandardInputController<EngineViewport>(primaryViewport);
+        timeline.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() == MouseButton.PRIMARY) ThreadUtils.onRenderThread(() -> {
+                editor.getReplayHandler().doJump((int) (timeline.getTimeAt(event.getX()) * 1000), true);
+            });
+        });
     }
 
     public void close() {
