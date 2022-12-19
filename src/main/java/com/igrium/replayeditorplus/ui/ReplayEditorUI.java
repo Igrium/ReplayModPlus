@@ -38,6 +38,7 @@ public class ReplayEditorUI {
     @Deprecated
     public void setEditor(ReplayEditor editor) {
         this.editor = editor;
+        timeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
     }
     
 

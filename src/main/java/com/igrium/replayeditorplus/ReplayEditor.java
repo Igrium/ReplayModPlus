@@ -3,6 +3,7 @@ package com.igrium.replayeditorplus;
 import com.igrium.craftfx.application.ApplicationType;
 import com.igrium.craftfx.application.CraftApplication;
 import com.igrium.replayeditorplus.ui.ReplayEditorUI;
+import com.igrium.replayeditorplus.util.ReplayProperties;
 import com.replaymod.replay.ReplayHandler;
 
 import javafx.application.Application;
@@ -14,7 +15,11 @@ import net.minecraft.client.MinecraftClient;
 
 public class ReplayEditor extends CraftApplication {
 
-    private ReplayHandler replayHandler;
+    /**
+     * Temp variable for if replay handler is set before JavaFX inits.
+     */
+    private ReplayHandler initReplayHandler;
+    private ReplayProperties replayProperties;
     
     protected ReplayEditorUI editorUI;
 
@@ -25,6 +30,8 @@ public class ReplayEditor extends CraftApplication {
     @Override
     @SuppressWarnings("deprecation")
     public void start(Stage primaryStage, Application parent) throws Exception {
+        replayProperties = new ReplayProperties();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource(ReplayEditorUI.FXML));
         Parent root = loader.load();
         editorUI = loader.getController();
@@ -34,14 +41,30 @@ public class ReplayEditor extends CraftApplication {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        if (initReplayHandler != null) {
+            replayProperties.setReplayHandler(initReplayHandler);
+        }
     }
 
     public ReplayHandler getReplayHandler() {
-        return replayHandler;
+        return replayProperties != null ? replayProperties.getReplayHandler() : initReplayHandler;
     }
 
     public void setReplayHandler(ReplayHandler replayHandler) {
-        this.replayHandler = replayHandler;
+        if (replayProperties != null) {
+            replayProperties.setReplayHandler(replayHandler);
+        } else {
+            initReplayHandler = replayHandler;
+        }
+    }
+
+    /**
+     * A set of JavaFX observables that reflect various elements of replays and
+     * replay handlers.
+     */
+    public ReplayProperties replayProperties() {
+        return replayProperties;
     }
 
     @Override
@@ -49,4 +72,7 @@ public class ReplayEditor extends CraftApplication {
         editorUI.close();
     }
     
+    void eachFrame() {
+        if (replayProperties != null) replayProperties.update();
+    }
 }

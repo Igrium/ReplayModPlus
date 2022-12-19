@@ -1,8 +1,10 @@
 package com.igrium.replayeditorplus;
 
+import com.igrium.craftfx.application.ApplicationManager;
 import com.igrium.craftfx.application.ApplicationType;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.util.Identifier;
 
 public class ReplayEditorPlus implements ClientModInitializer {
@@ -25,6 +27,11 @@ public class ReplayEditorPlus implements ClientModInitializer {
         module = new ReplayEditorModule();
         module.register();
         module.initClient();
+        
+        WorldRenderEvents.START.register(context -> {
+            ApplicationManager.getInstance().getAppInstance(EDITOR)
+                    .ifPresent(editor -> editor.eachFrame());
+        });
     }
 
     public ReplayEditorModule getModule() {
