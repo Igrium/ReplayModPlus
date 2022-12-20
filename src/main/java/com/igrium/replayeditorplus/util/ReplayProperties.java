@@ -107,7 +107,7 @@ public final class ReplayProperties {
     private DoubleProperty replayDuration = new SimpleDoubleProperty();
 
     /**
-     * The duration of the entire replay.
+     * The duration of the entire replay in seconds.
      * @see ReplayHandler#getReplayDuration()
      */
     public ObservableDoubleValue replayDuration() {

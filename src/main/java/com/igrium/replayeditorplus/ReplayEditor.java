@@ -11,8 +11,11 @@ import com.igrium.craftfx.util.ThreadUtils;
 import com.igrium.replayeditorplus.ui.ReplayEditorUI;
 import com.igrium.replayeditorplus.util.ReplayProperties;
 import com.replaymod.replay.ReplayHandler;
+import com.replaymod.replay.ReplaySender;
 
 import javafx.application.Application;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -64,6 +67,25 @@ public class ReplayEditor extends CraftApplication {
                 e.consume();
             }
         });
+        
+        playbackSpeedProperty.addListener((obs, oldVal, newVal) -> {
+            if (replayProperties.isPaused()) return;
+            setReplayPlayback(newVal.doubleValue());
+        });
+    }
+
+    private final DoubleProperty playbackSpeedProperty = new SimpleDoubleProperty(1);
+
+    public double getPlaybackSpeed() {
+        return playbackSpeedProperty.get();
+    }
+
+    public void setPlaybackSpeed(double playbackSpeed) {
+        playbackSpeedProperty.set(playbackSpeed);
+    }
+
+    public DoubleProperty playbackSpeedProperty() {
+        return playbackSpeedProperty;
     }
 
     @Nullable
@@ -79,7 +101,24 @@ public class ReplayEditor extends CraftApplication {
         }
     }
 
-    public void setReplayPlayback(double speed) {
+    public void setPaused(boolean paused) {
+        if (paused) {
+            setReplayPlayback(0);
+        } else {
+            setReplayPlayback(getPlaybackSpeed());
+        }
+    }
+
+    public void togglePause() {
+        setPaused(!replayProperties.isPaused());
+    }
+
+    /**
+     * Invoke <code>setReplaySpeed()</code> on the current replay sender.
+     * @param speed The speed factor.
+     * @see ReplaySender#setReplaySpeed(double)
+     */
+    private void setReplayPlayback(double speed) {
         ReplayHandler handler = getReplayHandler();
         if (handler == null) return;
 

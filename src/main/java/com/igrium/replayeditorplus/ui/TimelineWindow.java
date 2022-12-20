@@ -30,26 +30,18 @@ public final class TimelineWindow {
             }
         });
 
-        speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (editor.replayProperties().isPaused()) return;
-            editor.setReplayPlayback(newVal.doubleValue());
-        });
     }
 
     @FXML
     public void onPlayPause() {
-        boolean paused = editor.replayProperties().isPaused();
-        if (paused) {
-            editor.setReplayPlayback(speedSlider.getValue());
-        } else {
-            editor.setReplayPlayback(0);
-        }
+        editor.togglePause();
     }
 
     public void initEditor(ReplayEditor editor) {
         this.editor = editor;
         timeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
         timeline.endProperty().bind(editor.replayProperties().replayDuration());
+        speedSlider.valueProperty().bindBidirectional(editor.playbackSpeedProperty());
     }
 
     public ReplayEditor getEditor() {
