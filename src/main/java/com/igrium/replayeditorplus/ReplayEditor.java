@@ -36,7 +36,7 @@ public class ReplayEditor extends CraftApplication {
         Parent root = loader.load();
         editorUI = loader.getController();
 
-        editorUI.setEditor(this);
+        editorUI.initEditor(this);
 
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);

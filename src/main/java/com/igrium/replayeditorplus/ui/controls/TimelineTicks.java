@@ -78,7 +78,7 @@ class TimelineTicks extends Region {
         int numSeconds = (int) Math.ceil(getEnd() - getStart());
 
         final double secondWidth = timeToPos(1);
-        final double maxHeight = 64;
+        final double maxHeight = getHeight() / 2;
         double lineStart = getHeight();
 
         getChildren().clear();

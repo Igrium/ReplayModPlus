@@ -104,6 +104,20 @@ public final class ReplayProperties {
         return paused.get();
     }
 
+    private DoubleProperty replayDuration = new SimpleDoubleProperty();
+
+    /**
+     * The duration of the entire replay.
+     * @see ReplayHandler#getReplayDuration()
+     */
+    public ObservableDoubleValue replayDuration() {
+        return replayDuration;
+    }
+
+    public double getReplayDuration() {
+        return replayDuration.get();
+    }
+
     /**
      * Update all the values from the replay handler.
      */
@@ -117,6 +131,8 @@ public final class ReplayProperties {
         if (timelinePlayer.isActive()) {
             setDouble(timelinePlayer.getTimePassed() / 1000d, replayTimestamp);
         }
+
+        setDouble(handler.getReplayDuration() / 1000d, replayDuration);
     }
 
     private <T> void setVal(T val, Property<T> target) {
