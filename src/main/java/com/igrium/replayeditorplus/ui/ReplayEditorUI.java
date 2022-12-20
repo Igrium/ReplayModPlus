@@ -42,6 +42,9 @@ public class ReplayEditorUI {
         // timeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
     }
     
+    public TimelineWindow getTimelineWindow() {
+        return timelineWindowController;
+    }
 
     @FXML
     protected void initialize() {

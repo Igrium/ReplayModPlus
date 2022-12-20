@@ -1,5 +1,8 @@
 package com.igrium.replayeditorplus;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.igrium.craftfx.application.ApplicationType;
@@ -13,8 +16,11 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
 
 public class ReplayEditor extends CraftApplication {
 
@@ -25,9 +31,12 @@ public class ReplayEditor extends CraftApplication {
     private ReplayProperties replayProperties;
     
     protected ReplayEditorUI editorUI;
+    
+    private final Map<KeyCode, Identifier> keybinds = new HashMap<>();
 
     public ReplayEditor(ApplicationType<?> type, MinecraftClient client) {
         super(type, client);
+        keybinds.putAll(ReplayKeybinds.DEFAULTS);
     }
 
     @Override
@@ -48,6 +57,13 @@ public class ReplayEditor extends CraftApplication {
         if (initReplayHandler != null) {
             replayProperties.setReplayHandler(initReplayHandler);
         }
+        
+        scene.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            if (ReplayKeybinds.PLAY_PAUSE.equals(keybinds.get(e.getCode()))) {
+                editorUI.getTimelineWindow().onPlayPause();
+                e.consume();
+            }
+        });
     }
 
     @Nullable
@@ -81,6 +97,10 @@ public class ReplayEditor extends CraftApplication {
     @Override
     protected void onClosed() {
         editorUI.close();
+    }
+
+    public Map<KeyCode, Identifier> getKeybinds() {
+        return keybinds;
     }
     
     void eachFrame() {
