@@ -1,7 +1,10 @@
 package com.igrium.replayeditorplus;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.igrium.craftfx.application.ApplicationType;
 import com.igrium.craftfx.application.CraftApplication;
+import com.igrium.craftfx.util.ThreadUtils;
 import com.igrium.replayeditorplus.ui.ReplayEditorUI;
 import com.igrium.replayeditorplus.util.ReplayProperties;
 import com.replaymod.replay.ReplayHandler;
@@ -47,6 +50,7 @@ public class ReplayEditor extends CraftApplication {
         }
     }
 
+    @Nullable
     public ReplayHandler getReplayHandler() {
         return replayProperties != null ? replayProperties.getReplayHandler() : initReplayHandler;
     }
@@ -57,6 +61,13 @@ public class ReplayEditor extends CraftApplication {
         } else {
             initReplayHandler = replayHandler;
         }
+    }
+
+    public void setReplayPlayback(double speed) {
+        ReplayHandler handler = getReplayHandler();
+        if (handler == null) return;
+
+        ThreadUtils.onRenderThread(() -> handler.getReplaySender().setReplaySpeed(speed));
     }
 
     /**

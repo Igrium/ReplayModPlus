@@ -4,6 +4,7 @@ import com.igrium.craftfx.util.ThreadUtils;
 import com.igrium.replayeditorplus.ReplayEditor;
 import com.igrium.replayeditorplus.ui.controls.TimelineUI;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.input.MouseButton;
@@ -29,6 +30,21 @@ public final class Timelines {
                 event.consume();
             }
         });
+
+        speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (editor.replayProperties().isPaused()) return;
+            editor.setReplayPlayback(newVal.doubleValue());
+        });
+    }
+
+    @FXML
+    private void onPlayPause(ActionEvent event) {
+        boolean paused = editor.replayProperties().isPaused();
+        if (paused) {
+            editor.setReplayPlayback(speedSlider.getValue());
+        } else {
+            editor.setReplayPlayback(0);
+        }
     }
 
     public void initEditor(ReplayEditor editor) {

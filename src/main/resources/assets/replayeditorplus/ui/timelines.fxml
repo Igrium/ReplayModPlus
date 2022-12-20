@@ -33,7 +33,7 @@
                   <Slider fx:id="speedSlider" blockIncrement="0.5" majorTickUnit="1.0" max="3.0" minorTickCount="5" prefWidth="512.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
-            <Button minWidth="-Infinity" mnemonicParsing="false" text="Play/Pause" GridPane.columnIndex="2" />
+            <Button minWidth="-Infinity" mnemonicParsing="false" onAction="#onPlayPause" text="Play/Pause" GridPane.columnIndex="2" />
             <HBox spacing="5.0" GridPane.columnIndex="4">
                <children>
                   <Button mnemonicParsing="false" text="I" />
