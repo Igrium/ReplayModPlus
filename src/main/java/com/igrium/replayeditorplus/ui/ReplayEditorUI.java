@@ -15,7 +15,7 @@ public class ReplayEditorUI {
     private PrimaryViewport primaryViewport;
 
     @FXML
-    private Timelines timelinesController;
+    private TimelineWindow timelineWindowController;
 
     private StandardInputController<?> inputController;
     protected ReplayEditor editor;
@@ -38,7 +38,7 @@ public class ReplayEditorUI {
     @Deprecated
     public void initEditor(ReplayEditor editor) {
         this.editor = editor;
-        timelinesController.initEditor(editor);
+        timelineWindowController.initEditor(editor);
         // timeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
     }
     

@@ -10,7 +10,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
-public final class Timelines {
+public final class TimelineWindow {
 
     @FXML
     private Slider speedSlider;
