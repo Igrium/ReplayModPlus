@@ -65,11 +65,24 @@ public final class TimelineWindow {
 
     @FXML
     public void onPlayPause() {
-        editor.togglePause();
+        if (isDirectPlayback()) {
+            editor.togglePause();
+        } else {
+            if (editor.replayProperties().getTimelinePlayer().isActive()) {
+                editor.stopTimeline();
+            } else {
+                editor.startTimeline((int) (replayTimeline.getTime() * 1000));
+            }
+        }
+        
     }
 
     public BooleanProperty directPlaybackProperty() {
         return directPlaybackButton.selectedProperty();
+    }
+
+    public boolean isDirectPlayback() {
+        return directPlaybackButton.isSelected();
     }
 
     public void initEditor(ReplayEditor editor) {
@@ -77,6 +90,8 @@ public final class TimelineWindow {
         directTimeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
         directTimeline.endProperty().bind(editor.replayProperties().replayDuration());
         speedSlider.valueProperty().bindBidirectional(editor.playbackSpeedProperty());
+
+        replayTimeline.timeProperty().bind(editor.replayProperties().replayTimestamp());
     }
 
     public ReplayEditor getEditor() {

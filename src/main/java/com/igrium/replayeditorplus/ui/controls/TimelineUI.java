@@ -239,6 +239,8 @@ public class TimelineUI extends Region {
         timelineTicks.startProperty().bind(startProperty);
         timelineTicks.endProperty().bind(endProperty);
         timelineTicks.tickColorProperty().bind(tickColorProperty);
+        timelineTicks.maxWidthProperty().bind(widthProperty());
+        timelineTicks.maxHeightProperty().bind(heightProperty());
         getChildren().add(timelineTicks);
 
         playhead = createPlayhead();
