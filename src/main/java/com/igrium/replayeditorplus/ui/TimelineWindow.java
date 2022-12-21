@@ -4,8 +4,12 @@ import com.igrium.craftfx.util.ThreadUtils;
 import com.igrium.replayeditorplus.ReplayEditor;
 import com.igrium.replayeditorplus.ui.controls.TimelineUI;
 
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
@@ -15,21 +19,48 @@ public final class TimelineWindow {
     private Slider speedSlider;
 
     @FXML
-    private TimelineUI timeline;
+    private ScrollPane timelinePane;
+
+    @FXML
+    private ToggleButton directPlaybackButton;
+
+    private TimelineUI directTimeline;
+    private TimelineUI replayTimeline;
 
     private ReplayEditor editor;
 
+    private ObjectBinding<TimelineUI> timelineBinding;
+
     @FXML
     protected void initialize() {
-        timeline.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+        directTimeline = new TimelineUI();
+        directTimeline.setPrefScale(32);
+        timelinePane.setContent(directTimeline);
+
+        replayTimeline = new TimelineUI();
+        replayTimeline.setPrefScale(64);
+
+        directTimeline.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 ThreadUtils.onRenderThread(() -> {
-                    editor.getReplayHandler().doJump((int) (timeline.getTimeAt(event.getX()) * 1000), true);
+                    editor.getReplayHandler().doJump((int) (directTimeline.getTimeAt(event.getX()) * 1000), true);
                 });
                 event.consume();
             }
         });
 
+        timelineBinding = new ObjectBinding<>() {
+            {
+                super.bind(directPlaybackProperty());
+            }
+
+            @Override
+            protected TimelineUI computeValue() {
+                return directPlaybackProperty().get() ? directTimeline : replayTimeline;
+            }
+        };
+
+        timelinePane.contentProperty().bind(timelineBinding);
     }
 
     @FXML
@@ -37,10 +68,14 @@ public final class TimelineWindow {
         editor.togglePause();
     }
 
+    public BooleanProperty directPlaybackProperty() {
+        return directPlaybackButton.selectedProperty();
+    }
+
     public void initEditor(ReplayEditor editor) {
         this.editor = editor;
-        timeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
-        timeline.endProperty().bind(editor.replayProperties().replayDuration());
+        directTimeline.timeProperty().bind(editor.replayProperties().gameTimestamp());
+        directTimeline.endProperty().bind(editor.replayProperties().replayDuration());
         speedSlider.valueProperty().bindBidirectional(editor.playbackSpeedProperty());
     }
 
